@@ -1,0 +1,15 @@
+{
+  "name": "test-app-controller",
+  "version": "0.1.0",
+  "description": "Test for app-controller and web-shell-app",
+  "main": "master.html",
+  "scripts": {
+    "test": "parcel shell.html app.html"
+  },
+  "author": "Zoran Obradović",
+  "license": "ISC",
+  "browserslist": [
+    "last 1 Chrome versions",
+    "last 1 Firefox versions"
+  ]
+}
