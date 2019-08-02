@@ -4,8 +4,20 @@
     <link rel="stylesheet" href="shell.css">
   </head>
   <body>
-    This is the shell.<br>
-    <iframe id="iframe"></iframe>
+    <article>
+      <header>
+        <button onclick="tests.load()">Load</button>
+        <button onclick="tests.ping()">Ping</button>
+        <button onclick="tests.echo()"">Echo</button>
+        <button onclick="tests.log()">Log</button>
+        <button onclick="tests.close()">Close</button>
+        <button onclick="tests.unload()">Unload</button><br>
+      </header>
+      <main>
+        <iframe id="iframe"></iframe>
+        <pre id="log"></pre>
+      </main>
+    </article>
     <script src="shell.js"></script>
   </body>
 </html>

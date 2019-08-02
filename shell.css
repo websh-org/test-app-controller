@@ -1,4 +1,33 @@
+* {
+  box-sizing: border-box;
+}
+
+article {
+  position:absolute;
+  display:flex;
+  flex-flow:column;
+  height:100%;
+  width:100%;
+  left:0;
+  top:0;
+}
+
+main {
+  flex:1;
+  display:flex;
+  flex-flow:row;
+}
+
 #iframe {
-  width: 800px;
-  height:600px;
+  flex:1;
+}
+
+#log {
+  flex:1;
+  padding:12px;
+}
+
+#log i {
+  color:red;
+  font-weight:bold;
 }

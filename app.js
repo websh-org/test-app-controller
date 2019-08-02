@@ -6,3 +6,7 @@ WebShellApp.manifest({
     
   }
 })
+.command('test-ping', () => 'pong')
+.command('test-log', (args) => { console.log(args) })
+.command('test-echo', (args) => args)
+.command('app-close', () => { throw new Error("app-close-wait") })
