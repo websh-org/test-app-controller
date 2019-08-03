@@ -1,5 +1,5 @@
 import { assert } from "./utils";
-import { register, create } from './bios';
+import { register, overload, create } from './bios';
 import { RemoteMasterPort } from "@websh/remote-master-port";
 import "./app-api";
 
@@ -39,19 +39,20 @@ register('app-controller', {
       }
     },
   },
-  on: {
-    didLoad({manifest}) {
-      this.manifest = manifest;
+  methods: {
+    apiCall(aid, ...args) {
+      assert(this.loaded, "app-not-loaded");
+      assert(this.api[aid], "app-api-not-supported");
+      try {
+        return this.api[aid].call(...args);
+      } catch (error) {
+        assert(false, "app-call-failed");
+      }
     }
   },
-  call(aid,...args) {
-    if (aid==="app") return this.call(...args);
-    assert(this.loaded,"app-not-loaded");
-    assert(this.api[aid],"app-api-not-supported");
-    try {
-      return this.api[aid].call(...args);
-    } catch (error) {
-      assert( false, "app-call-failed");
+  on: {
+    didLoad({ manifest }) {
+      this.manifest = manifest;
     }
   },
   init({ iframe, url, debug = false }) {
@@ -67,14 +68,14 @@ register('app-controller', {
   commands: {
     'load': {
       async execute() {
-        assert(!this.loaded,"app-already-loaded");
+        assert(!this.loaded, "app-already-loaded");
         const promise = new Promise(async (resolve, reject) => {
           this.iframe.onload = async () => {
             this.loaded = true;
             this.iframe.onload = null;
             try {
               const manifest = await this.masterPort.connect();
-              await this.didLoad({manifest});
+              await this.didLoad({ manifest });
               this.connected = true;
               resolve(manifest);
             } catch (err) {
@@ -89,7 +90,7 @@ register('app-controller', {
     },
     'close': {
       execute() {
-        return new Promise(async (resolve,reject)=>{
+        return new Promise(async (resolve, reject) => {
           const timeout = setTimeout(
             async () => {
               reject(new Error("app-close-timeout"));
@@ -103,7 +104,7 @@ register('app-controller', {
             resolve();
           } catch (error) {
             clearTimeout(timeout);
-            reject (error);
+            reject(error);
           }
         })
       }
@@ -129,12 +130,41 @@ register('app-controller-test', {
   }
 })
 
-register('app-controller-file', {
+register('app-controller-file',{
   extends: 'app-controller',
   on: {
     didLoad() {
       this.mountApi('file');
-    }
+    },
+  },
+  commands: {
+    'file-set': {
+      async execute({file,format,content}) {
+        return await this.api.file.call('open', { file, format, content })
+      }
+    },
+    'file-get': {
+      async execute({file}) {
+        return await this.api.file.call('save', { file, format })
+      }
+    },
   }
 })
 
+register('desktop-window', {
+
+})
+
+overload('app-controller-file desktop-window', {
+  init({fm}) {
+    this.fm = fm;
+  },
+  commands: {
+    'file-open': {
+      async execute() {
+        const { file, format, content } = await this.fm.call('file-open-dialog', { formats: this.fileFormats });
+        return await this.call('file-set', { file, format, content });
+      }
+    }
+  }
+})

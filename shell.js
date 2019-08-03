@@ -1,13 +1,12 @@
 import { create } from "./src/bios";
-import "./src/app-controller";
+import "./src/single-app-shell";
 
 const iframe = document.getElementById('iframe');
 const output = document.getElementById('log');
 const url = "app.html";
 
 
-
-const app = window.app = create('app-controller-test app-controller-file', { iframe, url });
+const shell = window.shell = create('single-app-desktop', { iframe });
 
 function log(head, ...args) {
   output.innerHTML += `<b>${head}</b> ` + args.map(x=>JSON.stringify(x, null, 2)).join(" ") + "\n";
@@ -17,10 +16,10 @@ function logError(...args) {
   output.innerHTML += `<i>ERROR</i> ` + args.map(x=>JSON.stringify(x, null, 2)).join(" ") + "\n";
 }
 
-async function testRequest(aid, cmd, args) {
+async function testRequest(cmd, args) {
   log('requesting:', cmd, args);
   try {
-    var res = await app.call(aid,cmd, args);
+    var res = await shell.app.call(cmd, args);
     log('result:', res);
     return res;
   } catch (error) {
@@ -29,29 +28,22 @@ async function testRequest(aid, cmd, args) {
 }
 
 
-
-console.log({ app })
-
 const tests = {
   async load() {
-    await app.call('app','load');
-    log('manifest', app.manifest)
+    await shell.call('desktop-open-app',{url});
+    log('manifest', shell.app.manifest)
   },
   ping() {
-    return testRequest('test', 'ping');
+    return testRequest('test-ping');
   },
   echo() {
-    return testRequest('test', 'echo', "must be same");
+    return testRequest('test-echo', "must be same");
   },
   log() {
-    return testRequest('test', 'log', "must be logged by the app");
+    return testRequest('test-log', "must be logged by the app");
   },
   open() {
-    return testRequest('file', 'open', {
-      format: "text",
-      file: { type: "text/plain" }, 
-      content: "text content for the app"
-    });
+    return testRequest('file-open', {});
   },
   save() {
     return testRequest('file', 'save', {
